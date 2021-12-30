@@ -6,8 +6,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
- * A core mapper interface
- * @author Jose
+ * The core interface which defines the contract to map a result to a specific T type
  */
 public interface RowMapper<T> {
     

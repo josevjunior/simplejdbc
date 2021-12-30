@@ -62,6 +62,10 @@ public class UpdateBuilder {
         
         public int execute() {
             
+            if(columnsAndValues.isEmpty()){
+                throw new JdbcException("The update must have a WHERE condition");
+            }
+            
             SQLStatementBuilder stamBuilder = new SQLStatementBuilder();
             StringBuilder sbUpdate = stamBuilder.createUpdate(this);
             

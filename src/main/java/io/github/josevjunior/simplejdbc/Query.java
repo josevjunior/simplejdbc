@@ -16,26 +16,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * A query object that wraps the jdbc statement execution. Each query handle a 
+ * jdbc statement. Every operation at this class can throw a {@link io.github.josevjunior.simplejdbc.JdbcException}
+ * and the source can be from a {@link java.sql.SQLException} or a internal exception
+ * 
+ * @param <T> The type of the query that influences {@link Query#getResultList() }, 
+ * {@link Query#getFirstResult() } and {@link Query#getScrollableResult() } result
+ */
 public class Query<T> {
 
-    private final QueryCreator connection;
+    private final QueryCreator queryCreator;
     private final NamedParameterSQL namedParameterSQL;
     private final PreparedStatement statement;
     private final RowMapper<T> mapper;
 
-    public Query(NamedParameterSQL sql, PreparedStatement stam, QueryCreator connection, RowMapper<T> mapper) {
-        this.connection = connection;
+    public Query(NamedParameterSQL sql, PreparedStatement stam, QueryCreator creator, RowMapper<T> mapper) {
+        this.queryCreator = creator;
         this.namedParameterSQL = sql;
         this.mapper = mapper;
         this.statement = stam;
     }
 
+    /**
+     * Set the parameter value
+     * @param name The parameter name
+     * @param value The parameter value
+     * @return The query itself
+     */
     public Query<T> setParameter(String name, Object value) {
         int[] indexes = this.namedParameterSQL.getParamIndex(name);
+        
+        if(indexes == null || indexes.length == 0) {
+            throw new JdbcException("Parameter '" + name + "' not found");
+        }
+        
         setParameter(indexes, value);
         return this;
     }
     
+    /**
+     * Set the parameter value
+     * @param i The parameter index 
+     * @param value The parameter value
+     * @return 
+     */
     public Query<T> setParameter(int i, Object value) {
         setParameter(new int[] {i}, value);
         return this;
@@ -109,6 +134,9 @@ public class Query<T> {
         }
     }
     
+    /**
+     * Clear the setted parameters
+     */
     public void clearParameters() {
         try {
             this.statement.clearParameters();
@@ -117,14 +145,29 @@ public class Query<T> {
         }
     }
     
+    /**
+     * Execute the update into database if the query is a DML statement
+     * @return The updated rows count
+     */
     public int executeUpdate() {
         try {
-            return this.statement.executeUpdate();
-        }catch (SQLException e) {
+            boolean isASelect = this.statement.execute();
+            if(isASelect) {
+                throw new IllegalStateException("The query is not a DML statement");
+            }
+            
+            return this.statement.getUpdateCount();
+            
+        }catch (SQLException | IllegalStateException e) {
             throw new JdbcException(e);
         }
     }
     
+    /**
+     * Execute the query and return the first result as a {@link java.util.Optional}
+     * if the result does not exists the {@link java.util.Optional} will be empty
+     * @return The first result as {@link java.util.Optional}
+     */
     public Optional<T> getFirstResult() {
         
         ResultSet rs = null;
@@ -142,6 +185,11 @@ public class Query<T> {
         }
     }
     
+    /**
+     * Execute the query and return the result as a {@link java.util.List} with
+     * all the row mapped for the class
+     * @return a not null {@link java.util.List}
+     */
     public List<T> getResultList() {
         
         List<T> list = new ArrayList<>();
@@ -152,7 +200,7 @@ public class Query<T> {
             
             while(rs.next()) {
                 list.add(mapper.map(rs, metaData));
-            };
+            }
             
             return list;
             
@@ -163,6 +211,19 @@ public class Query<T> {
         }
     }
     
+    /**
+     * Get the {@link java.sql.PreparedStatement} associated with this Query
+     * @return a {@link java.sql.PreparedStatement}
+     */
+    public PreparedStatement getNativeStatement(){
+        return statement;
+    }
+    
+    /**
+     * Execute the query and return the result as a {@link io.github.josevjunior.simplejdbc.ScrollableResult} 
+     * with all the row mapped for the class
+     * @return a not null {@link io.github.josevjunior.simplejdbc.ScrollableResult}
+     */
     public ScrollableResult<T> getScrollableResult() {
         try {
             ResultSet rs = this.statement.executeQuery();
@@ -216,18 +277,18 @@ public class Query<T> {
         }
 
         @Override
-        public boolean goToFirst() {
+        public void beforeFirst() {
             try {
-                return rs.first();
+                rs.beforeFirst();
             }catch(SQLException e) {
                 throw new JdbcException(e);
             }
         }
 
         @Override
-        public boolean goToLast() {
+        public void afterLast() {
             try {
-                return rs.last();
+                rs.afterLast();
             }catch(SQLException e) {
                 throw new JdbcException(e);
             }

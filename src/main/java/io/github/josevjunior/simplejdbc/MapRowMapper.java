@@ -7,6 +7,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A mapper that converts a resultset row in a {@link java.util.HashMap}
+ * <br>
+ * The column name will be used as map key. So, is mandatory the sql contains
+ * accessible alias for the return columns
+ */
 public class MapRowMapper implements RowMapper<Map<String, Object>>{
 
     @Override
