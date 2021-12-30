@@ -30,7 +30,7 @@ or
 
 The QueryCreator is the entrypoint where the queries are created. All the it needs is a query string and the corresponding type that will be mapped to. The code bellow shows how simple is to map a query result in a list of your own models
 
-e.g:
+Example:
 
     QueryCreator qc = new QueryCreator(connection);
     Query<Employee> query = qc.create("SELECT ID, NAME, SALARY, BIRTHDAY FROM EMPLOYEE", Employee.class);
@@ -98,7 +98,7 @@ The library contains a set of built-in mapper that can be used from beginning. T
 3. **io.github.josevjunior.simplejdbc.MapRowMapper**: Map all the ResultSet column values in a `java.util.Map` implementation. As the column's aliases are used as the map key, empty aliases is not good idea here
 
 ## Using a Query
-The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jdbc connection and the row mapper. To map the data itself some methods are available:
+The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jdbc statement and the row mapper. To map the data itself some methods are available:
 
 1. **Query.getResultList()**: The simplest. Use it when you need a list of mapped data ready to be used. All the ResultSet will be iterate before to map the data.
 
@@ -122,7 +122,7 @@ The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jd
         
         BigDecimal max = query.getFirstResult().orElse(BigDecimal.ZERO);
 
-3. **Query.getScrollableResult()**: The overhead of the `getResultList()` can be a problem in some cases. The `io.github.josevjunior.simplejdbc.ScrollableResult` is a lazy mapper implementation is that cases you dont need all the list in memory at same time. *Note: * How the ScrollableResult hold a ResultSet, it must be closed after used.
+3. **Query.getScrollableResult()**: The overhead of the `getResultList()` can be a problem in some cases. The `io.github.josevjunior.simplejdbc.ScrollableResult` is a lazy mapper implementation is that cases you dont need all the list in memory at same time. *Note: As the ScrollableResult holds a ResultSet, it must be closed after use.*
 
     Example:
 
@@ -137,5 +137,112 @@ The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jd
             }
         }
 
+
+## How the resources are manage
+Create a `QueryCreator` can be made using a `java.sql.Connection` or a `javax.sql.DataSource`. If the `DataSource` constructor was used, the `getConnection()` method will be invoked to obtain the connection. Besides a connection, the `QueryCreator` holds all the statements created for each `Query`.
+
+To close the connection and it repective statements, call `QueryCreator.closeAll()` for it. Call `QueryCreator.disposeResources()` to close all the resources (statements) but not the connection itself.
+
+The `java.sql.ResultSet`'s are always closed when using `Query.getResultList()` and `Query.getFirstResult()`. If using the `Query.getScrollableResult()` the `ScrollableResult.close()` must be explicit called after use.
+
+
+## Updating records
+It's possible to update data using the Query class. Besides, it provides easy-to-use methods to build simples DML statements
+
+    Example 1:
+
+        QueryCreator qc = new QueryCreator(connection);
+        Query<Object[]> query = qc.create("UPDATE EMPLOYEE SET SALARY = SALARY * 2 WHERE PRODUCTIVITY = ? "); // If you dont pass a type, the ArrayRowMapper is used
+        query.setParameter(1, "EXCELLENT");
+        query.executeUpdate(); // Execute the update
+
+    Example 2:
+
+        QueryCreator qc = new QueryCreator(connection);
+        qc.update("EMPLOYEE")
+            .set("SALARY", calculateSalary()) // Does not support SQL expression here
+            .where()
+            .col("PRODUCTIVITY", "EXCELLENT") 
+            .col("SITUATION", "ACTIVE")
+            .execute();
+
+//The statement above will execute the following sql with the params setted:
+
+`UPDATE EMPLOYEE SET SALARY = :PARAM_NAME WHERE PRODUCTIVITY = :PARAM_NAME AND SITUATION = :PARAM_NAME`
+
+    Example 3:
+
+        QueryCreator qc = new QueryCreator(connection);
+        qc.insert("EMPLOYEE")
+            .col("NAME", "Joe")
+            .col("BIRTHDAY", new Timestamp())
+            .col("SALARY", 1000.0)
+            .execute();
+
+// The statement above will execute the following sql with the params setted:
+
+`INSERT INTO EMPLOYEE NAME, BIRTHDAY SALARY VALUES(:PARAM_NAME, :PARAM_NAME, :PARAM_NAME)`
+
+
+*Note: The library does not handle transactions. This must be do it by the client*
+
+
+## Understanding the BasicBeanMapper
+
+BasicBeanMapper is the default RowMapper used by the library to map the ResultSet in a bean(pojos, objects, etcs). The [Apache Commons DbUtils](https://github.com/apache/commons-dbutils) RowProcessor is used under the hood and it follows some rules that needs to be follow too.
+
+Let's do a example. The following sql: "SELECT ID, NAME, SALARY, BIRTHDAY FROM EMPLOYEE" need to be map to the `Employee` class. The class must following the Java beans pattern, which means in provides a getter and setter for each property
+
+    class Employe {
+
+        // No constructor or a default constructor
+
+        private Integer id;
+        private String name;
+        private BigDecimal salary;
+        private Date birhtday;
+
+        public Integer getId(){
+            return id;
+        }
+
+        public void setId(Integer id){
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public BigDecimal getSalary(){
+            return salary;
+        }
+
+        public void setSalary(BigDecimal id){
+            this.salary = salary;
+        }
+
+        public Date getBirhtday(){
+            return birhtday;
+        }
+
+        public void setBirhtday(Date birhtday){
+            this.birhtday = birhtday;
+        }
+
+    }
+
+For each column alias declared in the sql a setter method will try to be found and invoked with the corresponding value
+
+    setId => ID
+    setName => NAME
+    setSalary => SALARY
+    setBirthday => BIRTHDAY
+
+The type will be inferred too. So using a method with different from the column can result in a exception being thrown
 
     

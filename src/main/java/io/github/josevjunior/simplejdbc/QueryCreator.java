@@ -24,7 +24,7 @@ import javax.sql.DataSource;
  * method
  * <br>
  * As the object is associated to a resource, you may need dispose it after use.
- * If you create the object through the Datasource constructor, the {@link #closeConnection()}
+ * If you create the object through the Datasource constructor, the {@link #closeAll()}
  * call is mandatory, otherwise you only should call the {@link #disposeResources()} 
  * method
  */
@@ -212,7 +212,10 @@ public class QueryCreator implements AutoCloseable {
         return new InsertBuilder(this, table);
     }
     
-    public void closeConnection(){
+    /**
+     * Close all resources obtained by this QueryCreator, and the connection
+     */
+    public void closeAll(){
         
         disposeResources();
         
@@ -222,7 +225,7 @@ public class QueryCreator implements AutoCloseable {
     }
     
     /**
-     * Close all resources obtained by this QueryCreator
+     * Close all resources obtained by this QueryCreator, except the connection
      */
     public void disposeResources(){
         for (PreparedStatement statement : statements) {
@@ -233,7 +236,7 @@ public class QueryCreator implements AutoCloseable {
     }
 
     public void close() {
-        closeConnection();
+        closeAll();
     }
     
     /**
