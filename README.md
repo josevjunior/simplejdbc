@@ -1,6 +1,30 @@
 # Simple Jdbc
 A simple database row mapper for Java
 
+Declare the tags bellow to use with maven. **(For now only the SNAPSHOT builds are available)**
+
+    <!-- Declare the snapshot central repository -->
+    <repositories>
+        <repository>
+            <id>oss.sonatype.org-snapshot</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependency>
+            <groupId>io.github.josevjunior</groupId>
+            <artifactId>simplejdbc</artifactId>
+            <version>1.1.1-SNAPSHOT</version>
+    </dependency>
+
+
+
 When we're using jdbc api directly a very common if we don't want to handle a resultset directly in the core code, we first map it to a domain pojo
 
 
@@ -102,7 +126,7 @@ The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jd
 
 1. **Query.getResultList()**: The simplest. Use it when you need a list of mapped data ready to be used. All the ResultSet will be iterate before to map the data.
 
-    Example:
+Example:
         
         QueryCreator qc = new QueryCreator(connection);
         Query<Employee> query = qc.create("SELECT ID, NAME, SALARY, BIRTHDAY FROM EMPLOYEE", Employee.class);
@@ -114,7 +138,7 @@ The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jd
 
 2. **Query.getFirstResult()**: When you need only the first result of the query. The ResultSet.next() method will be called only once. If returned true, a filled `java.util.Optional` will be returned. If does not, a empty Optional will be in place.
 
-    Example:
+Example:
 
         QueryCreator qc = new QueryCreator(connection);
         Query<BigDecimal> query = qc.create("SELECT MAX(SALARY) FROM EMPLOYEE WHERE GROUPID = :GROUPID ", BigDecimal.class);
@@ -124,7 +148,7 @@ The `io.github.josevjunior.simplejdbc.Query` is the bridge between the native jd
 
 3. **Query.getScrollableResult()**: The overhead of the `getResultList()` can be a problem in some cases. The `io.github.josevjunior.simplejdbc.ScrollableResult` is a lazy mapper implementation is that cases you dont need all the list in memory at same time. *Note: As the ScrollableResult holds a ResultSet, it must be closed after use.*
 
-    Example:
+Example:
 
         QueryCreator qc = new QueryCreator(connection);
         Query<Employee> query = qc.create("SELECT ID, NAME, SALARY, BIRTHDAY FROM EMPLOYEE", Employee.class);
@@ -149,14 +173,14 @@ The `java.sql.ResultSet`'s are always closed when using `Query.getResultList()` 
 ## Updating records
 It's possible to update data using the Query class. Besides, it provides easy-to-use methods to build simples DML statements
 
-    Example 1:
+Example 1:
 
         QueryCreator qc = new QueryCreator(connection);
         Query<Object[]> query = qc.create("UPDATE EMPLOYEE SET SALARY = SALARY * 2 WHERE PRODUCTIVITY = ? "); // If you dont pass a type, the ArrayRowMapper is used
         query.setParameter(1, "EXCELLENT");
         query.executeUpdate(); // Execute the update
 
-    Example 2:
+Example 2:
 
         QueryCreator qc = new QueryCreator(connection);
         qc.update("EMPLOYEE")
@@ -170,7 +194,7 @@ It's possible to update data using the Query class. Besides, it provides easy-to
 
 `UPDATE EMPLOYEE SET SALARY = :PARAM_NAME WHERE PRODUCTIVITY = :PARAM_NAME AND SITUATION = :PARAM_NAME`
 
-    Example 3:
+Example 3:
 
         QueryCreator qc = new QueryCreator(connection);
         qc.insert("EMPLOYEE")

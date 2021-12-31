@@ -10,19 +10,25 @@ public class JdbcUtils {
     
     public static void close(Connection  c){
         try{
-            c.close();
+            if(c != null) {
+                c.close();
+            }
         }catch(SQLException e){}
     }
     
     public static void close(Statement s){
         try{
-            s.close();
+            if(s != null) {
+                s.close();
+            }
         }catch(SQLException e){}
     }
     
     public static void close(ResultSet r){
         try{
-            r.close();
+            if(r != null) {
+                r.close();
+            }
         }catch(SQLException e){}
     }
     
