@@ -3,7 +3,7 @@ A simple database row mapper for Java
 
 Declare the tags bellow to use with maven. **(For now only the SNAPSHOT builds are available)**
 
-    <!-- Declare the snapshot central repository -->
+    <!-- Declare the central snapshot repository -->
     <repositories>
         <repository>
             <id>oss.sonatype.org-snapshot</id>
