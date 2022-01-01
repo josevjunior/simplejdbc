@@ -1,7 +1,7 @@
 # Simple Jdbc
 A simple database row mapper for Java
 
-Declare the tags bellow to use with maven. **(For now only the SNAPSHOT builds are available)**
+Declare the tags bellow in your pom.xml to use it with maven. **(For now only the SNAPSHOT builds are available)**
 
     <!-- Declare the central snapshot repository -->
     <repositories>
@@ -267,6 +267,6 @@ For each column alias declared in the sql a setter method will try to be found a
     setSalary => SALARY
     setBirthday => BIRTHDAY
 
-The type will be inferred too. So using a method with different from the column can result in a exception being thrown
+The type will be inferred too. So using a method with different type of the column may result in a exception being thrown
 
     
