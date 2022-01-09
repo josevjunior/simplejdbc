@@ -20,7 +20,7 @@ jobs:
       - name: Install gpg secret key
         run: |
             cat <(echo -e "${{ secrets.OSSRH_GPG_TOKEN }}") | gpg --batch --import
-            cat /home/runner/.gnupg/gpg.conf
+            ls /home/runner/.gnupg
       
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v2
