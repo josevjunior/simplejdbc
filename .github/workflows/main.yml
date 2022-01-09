@@ -20,7 +20,6 @@ jobs:
       - name: Install gpg secret key
         run: |
             cat <(echo -e "${{ secrets.OSSRH_GPG_TOKEN }}") | gpg --batch --import
-            gpg --list-secret-keys --keyid-format LONG
       
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v2
@@ -32,7 +31,7 @@ jobs:
             password: MAVEN_PASSWORD
       # Runs a single command using the runners shell
       - name: Publish package
-        run: mvn --batch-mode deploy
+        run: mvn --batch-mode -Prelease clean deploy
         env:
             MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
             MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
