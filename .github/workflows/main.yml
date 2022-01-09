@@ -1,0 +1,33 @@
+name: Publish package to the Maven Central Repository
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v2
+        with:
+            distribution: 'adopt'
+            java-version: '11'
+            server-id: 'ossrh'
+            username: MAVEN_NAME
+            password: MAVEN_PASSWORD
+      # Runs a single command using the runners shell
+      - name: Publish package
+        run: mvn --batch-mode deploy
+        env:
+            MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+            MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
