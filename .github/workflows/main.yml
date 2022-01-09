@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
             distribution: 'adopt'
-            java-version: '11'
+            java-version: '8'
             server-id: 'ossrh'
             username: MAVEN_NAME
             password: MAVEN_PASSWORD
