@@ -37,5 +37,5 @@ jobs:
             MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
             MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
             SIGN_KEY: ${{ secrets.OSSRH_GPG_TOKEN }}
-            SIGN_KEY_ID: ${{ secrets.OSSRH_USERNAME }}
-            SIGN_KEY_PASS: ${{ secrets.OSSRH_TOKEN }}
+            SIGN_KEY_ID: ${{ secrets.GPG_SIGN_KEY_ID }}
+            SIGN_KEY_PASS: ${{ secrets.GPG_SIGN_PASS }}
