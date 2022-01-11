@@ -27,15 +27,13 @@ jobs:
             distribution: 'adopt'
             java-version: '8'
             server-id: ossrh
-            username: MAVEN_NAME
-            password: MAVEN_PASSWORD
+            server-username: MAVEN_NAME
+            server-password: MAVEN_PASSWORD
             gpg-private-key: ${{ secrets.OSSRH_GPG_TOKEN }}
             gpg-passphrase: SIGN_KEY_PASS
       # Runs a single command using the runners shell
       - name: Publish package
-        run: | 
-            gpg --list-secret-keys --keyid-format LONG
-            mvn --batch-mode -Prelease -e clean deploy -Dgpg.passphrase=${{ secrets.GPG_SIGN_PASS }}
+        run: mvn --batch-mode -Prelease -e clean deploy -Dgpg.passphrase=${{ secrets.GPG_SIGN_PASS }}
         env:
             MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
             MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
