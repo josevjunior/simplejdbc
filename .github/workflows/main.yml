@@ -26,7 +26,7 @@ jobs:
         with:
             distribution: 'adopt'
             java-version: '8'
-            server-id: 'ossrh'
+            server-id: ossrh
             username: MAVEN_NAME
             password: MAVEN_PASSWORD
             gpg-private-key: ${{ secrets.OSSRH_GPG_TOKEN }}
