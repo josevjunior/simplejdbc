@@ -33,7 +33,7 @@ jobs:
             gpg-passphrase: SIGN_KEY_PASS
       # Runs a single command using the runners shell
       - name: Publish package
-        run: mvn --no-transfer-progress --batch-mode -Prelease -e clean deploy -Dgpg.passphrase=${{ secrets.GPG_SIGN_PASS }}
+        run: echo "$GITHUB_CONTEXT"
         env:
             MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
             MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
