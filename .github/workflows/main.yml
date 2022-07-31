@@ -33,7 +33,7 @@ jobs:
             gpg-passphrase: SIGN_KEY_PASS
       # Runs a single command using the runners shell
       - name: Publish package
-        run: echo "$GITHUB_CONTEXT"
+        run: echo "$(cat /home/runner/.m2/settings.xml)"
         env:
             MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
             MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
